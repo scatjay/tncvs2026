@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>南商工作坊｜AI輔助備審練習單</title>
+<meta name="description" content="2026/05/22 國立臺南高商 AI輔助備審資料製作工作坊 線上練習單" />
+<style>
+  :root {
+    --navy: #1B2541;
+    --navy-soft: #2A3556;
+    --red: #D62828;
+    --gold: #B8902A;
+    --green: #0A7C2F;
+    --ink: #2A2A2A;
+    --muted: #6B6B6B;
+    --card: #F4F1EC;
+    --rule: #D9D2C5;
+    --bg: #FCFAF7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  /* === Layout === */
+  .wrap { max-width: 800px; margin: 0 auto; padding: 24px 20px 80px; }
+  header.top {
+    background: var(--navy);
+    color: #fff;
+    padding: 32px 20px 28px;
+  }
+  header.top .inner { max-width: 800px; margin: 0 auto; }
+  header.top .label {
+    font-size: 12px; letter-spacing: 4px; color: var(--gold);
+    font-weight: 700; margin-bottom: 8px;
+  }
+  header.top h1 { font-size: 32px; margin: 0 0 8px; font-weight: 800; }
+  header.top .sub { color: #B8B8C8; font-size: 14px; }
+
+  /* === Progress === */
+  .progress {
+    position: sticky; top: 0; z-index: 50;
+    background: #fff;
+    border-bottom: 1px solid var(--rule);
+    padding: 12px 20px;
+  }
+  .progress .inner {
+    max-width: 800px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px;
+  }
+  .pbar { flex: 1; height: 6px; background: var(--card); border-radius: 99px; overflow: hidden; }
+  .pbar-fill { height: 100%; background: var(--red); transition: width 0.3s; }
+  .step-count { font-weight: 700; color: var(--navy); }
+  .save-status { color: var(--muted); font-size: 12px; }
+
+  /* === Section === */
+  section.step {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 28px 24px;
+    margin-bottom: 20px;
+  }
+  section.step.active { display: block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .step-title-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .step-tag {
+    background: var(--red); color: #fff; padding: 2px 10px;
+    font-size: 11px; letter-spacing: 2px; font-weight: 700;
+    border-radius: 99px;
+  }
+  .step h2 {
+    color: var(--navy); margin: 0;
+    font-size: 24px; font-weight: 800;
+  }
+  .step .lead {
+    color: var(--muted); font-size: 14px; margin: 8px 0 18px;
+  }
+
+  /* === Form === */
+  label { display: block; margin: 16px 0 6px; font-weight: 600; color: var(--navy); }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--rule); border-radius: 6px;
+    font-family: inherit; font-size: 15px;
+    background: #fff;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold);
+  }
+  textarea { min-height: 100px; resize: vertical; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 540px) { .row2 { grid-template-columns: 1fr; } }
+
+  /* === Button === */
+  .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+  button {
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    padding: 12px 22px; border-radius: 6px; cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .15s;
+  }
+  button.primary { background: var(--navy); color: #fff; }
+  button.primary:hover { background: var(--navy-soft); }
+  button.ghost { background: transparent; color: var(--navy); border-color: var(--rule); }
+  button.ghost:hover { background: var(--card); }
+  button.alert { background: var(--red); color: #fff; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .nav-spacer { flex: 1; }
+
+  /* === Cards === */
+  .card {
+    background: var(--card);
+    border-left: 4px solid var(--gold);
+    padding: 14px 16px; margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+  }
+  .card.warn { border-left-color: var(--red); background: #FFEDED; }
+  .card.good { border-left-color: var(--green); background: #E8F5EC; }
+  .card .ttl { font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+
+  /* === Quote/Example === */
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin: 14px 0;
+  }
+  @media (max-width: 600px) { .compare { grid-template-columns: 1fr; } }
+  .compare .col {
+    padding: 14px; border-radius: 6px; font-size: 14px;
+  }
+  .compare .bad { background: #FFEDED; border: 1px solid var(--red); }
+  .compare .good { background: #EDF4FF; border: 1px solid var(--navy); }
+  .compare .ttl { font-weight: 700; margin-bottom: 6px; font-size: 12px; letter-spacing: 1px; }
+  .compare .bad .ttl { color: var(--red); }
+  .compare .good .ttl { color: var(--navy); }
+
+  /* === Prompt block === */
+  .prompt-block {
+    background: #1A1F33; color: #E8E8E8;
+    padding: 14px 14px 12px; border-radius: 6px;
+    margin: 10px 0;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 13px; line-height: 1.6;
+    position: relative;
+  }
+  .prompt-block .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--gold); color: var(--navy);
+    padding: 4px 10px; font-size: 11px;
+    border-radius: 4px; border: 0; cursor: pointer; font-weight: 700;
+  }
+  .prompt-block .copy-btn:hover { background: #D4A638; }
+  .prompt-block .pttl {
+    color: var(--gold); font-weight: 700; font-size: 12px;
+    letter-spacing: 1px; margin-bottom: 8px;
+    font-family: "Microsoft JhengHei", system-ui, sans-serif;
+  }
+
+  /* === 三紅線 === */
+  .three-lines { margin: 16px 0; }
+  .line-row {
+    display: grid; grid-template-columns: 110px 1fr; gap: 0;
+    border: 1px solid var(--rule);
+    border-bottom: 0;
+  }
+  .line-row:last-child { border-bottom: 1px solid var(--rule); }
+  .line-row .lbl {
+    padding: 12px 14px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .line-row.green .lbl { background: #E8F5EC; color: var(--green); }
+  .line-row.yellow .lbl { background: #FBF4DC; color: var(--gold); }
+  .line-row.red .lbl { background: #FFEDED; color: var(--red); }
+  .line-row .desc { padding: 12px 14px; font-size: 14px; }
+  @media (max-width: 540px) {
+    .line-row { grid-template-columns: 1fr; }
+    .line-row .lbl { justify-content: flex-start; }
+  }
+
+  /* === Discipline cards === */
+  .dpcard h3 { color: var(--navy); margin: 22px 0 8px; font-size: 18px; }
+  .asset-list { list-style: none; padding: 0; margin: 8px 0; }
+  .asset-list li {
+    padding: 8px 12px; margin: 4px 0;
+    background: var(--card); border-radius: 4px;
+    font-size: 14px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .asset-list label { display: flex; gap: 8px; align-items: flex-start; margin: 0; cursor: pointer; font-weight: 400; color: var(--ink); width: 100%; }
+  .asset-list input[type="checkbox"] { width: auto; margin: 4px 0 0; flex-shrink: 0; }
+
+  /* === Declaration === */
+  .declaration {
+    background: var(--navy); color: #fff;
+    padding: 22px; border-radius: 8px; margin: 18px 0;
+    font-size: 16px; font-weight: 600; line-height: 1.8;
+  }
+  .declaration textarea {
+    background: rgba(255,255,255,0.1); color: #fff;
+    border: 1px solid var(--gold);
+    margin-top: 10px;
+  }
+
+  /* === Submit summary === */
+  .summary-card {
+    background: #fff; border: 2px solid var(--gold);
+    padding: 20px; border-radius: 8px; margin: 14px 0;
+  }
+  .summary-card h3 { margin: 0 0 12px; color: var(--navy); }
+  .summary-row {
+    display: grid; grid-template-columns: 110px 1fr; gap: 8px;
+    padding: 6px 0; border-bottom: 1px dashed var(--rule); font-size: 14px;
+  }
+  .summary-row:last-child { border-bottom: 0; }
+  .summary-row .k { font-weight: 700; color: var(--muted); }
+  .summary-row .v { color: var(--ink); white-space: pre-wrap; }
+
+  /* === Misc === */
+  .small { font-size: 12px; color: var(--muted); }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--navy); color: #fff;
+    padding: 10px 18px; border-radius: 99px;
+    font-size: 14px; font-weight: 600;
+    z-index: 100; opacity: 0; transition: opacity .3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  hr.sep { border: 0; border-top: 1px solid var(--rule); margin: 20px 0; }
+
+  /* Final reveal */
+  .done-wrap {
+    text-align: center; padding: 40px 20px;
+  }
+  .done-wrap h1 { color: var(--navy); margin: 0 0 12px; }
+  .download-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 24px 0; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <div class="label">2026/05/22 國立臺南高商工作坊</div>
+    <h1>AI 輔助備審練習單</h1>
+    <div class="sub">講師：三知餘文化｜ 線上練習版</div>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="inner">
+    <span class="step-count" id="stepCount">第 1 / 7 步</span>
+    <div class="pbar"><div class="pbar-fill" id="pbarFill" style="width: 14%"></div></div>
+    <span class="save-status" id="saveStatus">●&nbsp;自動儲存中</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ STEP 0: 個人資料 ============ -->
+<section class="step active" data-step="0">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 0</span>
+    <h2>先填一下你是誰</h2>
+  </div>
+  <p class="lead">這份練習單會自動存在你瀏覽器裡。除非你按下最後一頁的「送出」，老師看不到——所以放心寫真的。</p>
+
+  <div class="row2">
+    <div>
+      <label for="f_name">姓名</label>
+      <input type="text" id="f_name" placeholder="例：王小明" />
+    </div>
+    <div>
+      <label for="f_class">班級</label>
+      <input type="text" id="f_class" placeholder="例：商三甲" />
+    </div>
+  </div>
+  <div class="row2">
+    <div>
+      <label for="f_dept">就讀科別 *</label>
+      <select id="f_dept" required>
+        <option value="">請選擇</option>
+        <option value="商業經營科">商業經營科</option>
+        <option value="國際貿易科">國際貿易科</option>
+        <option value="會計事務科">會計事務科</option>
+        <option value="資料處理科">資料處理科</option>
+        <option value="應用英語科">應用英語科</option>
+      </select>
+      <div class="hint">選了科別後，第 4 步會自動帶出你科別的題目。</div>
+    </div>
+    <div>
+      <label for="f_target">目前最想報考的科系</label>
+      <input type="text" id="f_target" placeholder="例：南台科大 多媒體系" />
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ttl">⚑ 約定</div>
+    這 90 分鐘的填寫，主軸不是「教你 AI 技術」，是「點破 AI 寫備審的盲點 → 突破侷限 → 最大化只有你能寫的真實性」。
+  </div>
+
+  <div class="nav">
+    <span></span>
+    <button class="primary" onclick="nextStep()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ============ STEP 1: 開場手寫 6 題 ============ -->
+<section class="step" data-step="1">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 1</span>
+    <h2>先把記憶寫下來（30 分鐘）</h2>
+  </div>
+  <p class="lead">下面 6 題，請花 30 分鐘填寫。寫得越具體越好——時間、地點、人物、感受。寫完不用給任何人看（除非你按最後的送出）。</p>
+
+  <div class="card warn">
+    <div class="ttl">⚠️ 為什麼先手寫？</div>
+    研究發現：先讓 AI 生成的學生，後面很難再寫出真實內容。先把「只有你能寫的」鎖住，再用 AI 修飾。
+  </div>
+
+  <label for="q1">Q1. 我家裡發生過最特別的一件事？（時間、地點、誰在場、發生什麼）</label>
+  <textarea id="q1"></textarea>
+
+  <label for="q2">Q2. 我做過最丟臉／最挫敗的一件事？我從中學到什麼？</label>
+  <textarea id="q2"></textarea>
+
+  <label for="q3">Q3. 我曾經為某件事熬夜——那是什麼？我為什麼願意？</label>
+  <textarea id="q3"></textarea>
+
+  <label for="q4">Q4. 別人不太知道的我的小怪癖？</label>
+  <textarea id="q4"></textarea>
+
+  <label for="q5">Q5. 我曾在哪一個科目「突然開竅」？怎麼開的？</label>
+  <textarea id="q5"></textarea>
+
+  <label for="q6">Q6. 我現在最想學會的一個技能是什麼？為什麼？</label>
+  <textarea id="q6"></textarea>
+
+  <div class="card good">
+    <div class="ttl">✓ 一個秘密</div>
+    這 6 題的答案，AI 換成另一個高三生，會寫出一樣的嗎？不會。這就是你的「真實性」——它已經在你身上，不需要靠 AI 生成。
+  </div>
+
+  <div class="nav">
+    <button class="ghost" onclick="prevStep()">← 上一步</button>
+    <button class="primary" onclick="nextStep()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ============ STEP 2: 看普通 vs 真實對照 ============ -->
+<section class="step" data-step="2">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 2</span>
+    <h2>看 5 個「乾巴巴 → 真實有戲」對照範例</h2>
+  </div>
+  <p class="lead">先讀這 5 個對照，你會發現「真實性」不是天賦，是把細節寫對地方。</p>
+
+  <h3 style="color: var(--navy); margin-top: 20px;">範例 1｜興趣動機</h3>
+  <div class="compare">
+    <div class="col bad">
+      <div class="ttl">乾巴巴</div>
+      我從小就對商業有興趣，希望未來能成為一名行銷人才。
+    </div>
+    <div class="col good">
+      <div class="ttl">真實有戲</div>
+      國二時媽媽的早餐店業績下滑，我開始幫忙觀察客人，發現週六客人多但毛利低——因為他們點奶茶。這是我第一次發現「來客數」與「客單利潤」是兩件事。
+    </div>
+  </div>
+
+  <h3 style="color: var(--navy);">範例 2｜跨域連結</h3>
+  <div class="compare">
+    <div class="col bad">
+      <div class="ttl">乾巴巴</div>
+      我除了會計專業，也對人文有興趣，是個全方位的學生。
+    </div>
+    <div class="col good">
+      <div class="ttl">真實有戲</div>
+      我考過會計丙級，但讓我真正想學會計的是國一幫媽媽核對信用卡帳單時，發現一筆 369 元盜刷——爸媽信任我這件事，是我選會計的真正理由。
+    </div>
+  </div>
+
+  <h3 style="color: var(--navy);">範例 3｜挫敗經驗</h3>
+  <div class="compare">
+    <div class="col bad">
+      <div class="ttl">乾巴巴</div>
+      我曾經在比賽中失利，但這個經驗讓我更加堅強。
+    </div>
+    <div class="col good">
+      <div class="ttl">真實有戲</div>
+      高一參加校內資料分析比賽只得佳作，因為我花太多時間做圖表、忽略「敘述故事」的部分。決賽當天看別組的簡報才發現：資料只是工具，故事才是力量。
+    </div>
+  </div>
+
+  <h3 style="color: var(--navy);">範例 4｜跨文化經驗</h3>
+  <div class="compare">
+    <div class="col bad">
+      <div class="ttl">乾巴巴</div>
+      我喜歡接觸不同文化，希望未來能從事國際相關工作。
+    </div>
+    <div class="col good">
+      <div class="ttl">真實有戲</div>
+      我家做家具五金外銷，八成客戶在越南。國二有次客戶來訪，我發現他講的越南話夾雜法文單字——查了才知道殖民歷史。從此我開始注意「語言裡的歷史」。
+    </div>
+  </div>
+
+  <h3 style="color: var(--navy);">範例 5｜技術自學</h3>
+  <div class="compare">
+    <div class="col bad">
+      <div class="ttl">乾巴巴</div>
+      我自學程式設計，期望未來進入資工系深造。
+    </div>
+    <div class="col good">
+      <div class="ttl">真實有戲</div>
+      高一寒假爸爸便當店業績變差。我把過去 3 個月訂單匯入 Google Sheet，發現週三業績低 25%——後來知道是隔壁有人擺攤搶客。這是我第一次發現「資料能看見肉眼看不見的事」。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ttl">關鍵差別</div>
+    真實版有 4 件事：<strong>具體時間 / 具體數字 / 具體地點 / 具體感受</strong>。AI 生成的內容平均 0 個。
+  </div>
+
+  <label for="reflect_examples">讀完這 5 個範例，哪一個最像你？或最讓你想到自己也有類似的故事？</label>
+  <textarea id="reflect_examples" placeholder="不用寫長，一兩句就好。"></textarea>
+
+  <div class="nav">
+    <button class="ghost" onclick="prevStep()">← 上一步</button>
+    <button class="primary" onclick="nextStep()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ============ STEP 3: 三紅線 ============ -->
+<section class="step" data-step="3">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 3</span>
+    <h2>AI 三條線：知道哪裡能用、哪裡不要碰</h2>
+  </div>
+  <p class="lead">這三條線不是規定，是讓你用對地方。</p>
+
+  <div class="three-lines">
+    <div class="line-row green">
+      <div class="lbl">🟢 綠燈</div>
+      <div class="desc"><strong>AI 可以放手做：</strong>拼字檢查、文法、整體段落順序、小標下法、整理表格。</div>
+    </div>
+    <div class="line-row yellow">
+      <div class="lbl">🟡 黃燈</div>
+      <div class="desc"><strong>AI 給建議，你自己改：</strong>結構安排、舉例選哪個比較好、語氣是否太硬太軟、是否該補一段。</div>
+    </div>
+    <div class="line-row red">
+      <div class="lbl">🔴 紅燈</div>
+      <div class="desc"><strong>AI 一句都不要碰：</strong>感官細節、家裡的事、疾病/挫折經歷、引用具體人物、引用具體地名/店名/活動。</div>
+    </div>
+  </div>
+
+  <p style="margin-top: 18px;">把你 Step 1 寫的內容，分到這三個格子裡——</p>
+
+  <label for="line_green">🟢 綠燈格｜AI 可以幫我修飾的段落</label>
+  <textarea id="line_green" placeholder="例如：我寫的「我從小就對商業有興趣」這種開場句，可以讓 AI 幫我改得更精準。"></textarea>
+
+  <label for="line_yellow">🟡 黃燈格｜AI 可以給結構建議的段落</label>
+  <textarea id="line_yellow" placeholder="例如：我有幫媽媽店面記帳的經驗，但不知道要從哪個角度切入——這種可以問 AI 給三個切入角度。"></textarea>
+
+  <label for="line_red">🔴 紅燈格｜只有我能寫的真實段落</label>
+  <textarea id="line_red" placeholder="例如：媽媽店裡那次盜刷 369 元的細節、客戶講越南話夾法文、3 個月訂單分析後發現週三業績低 25%。"></textarea>
+
+  <div class="nav">
+    <button class="ghost" onclick="prevStep()">← 上一步</button>
+    <button class="primary" onclick="nextStep()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ============ STEP 4: 4 個 Prompt 模板（現場用） ============ -->
+<section class="step" data-step="4">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 4</span>
+    <h2>4 個免費 AI 協作 prompt（直接複製去用）</h2>
+  </div>
+  <p class="lead">這 4 個 prompt 是設計過的——重點是「請 AI 不要替你寫」。</p>
+
+  <div class="prompt-block">
+    <div class="pttl">PROMPT A — 給 NotebookLM（當你的鏡子）</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">複製</button>
+    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">請只根據我上傳的內容（手寫六題照片或打字檔），幫我做以下三件事：
+1) 把我寫的內容整理成 3-5 個主題群組
+2) 指出哪一段「最有畫面感」、哪一段「最容易被忽略」
+3) 列出 3 個我「沒寫但應該補進去」的問題給我自己回答
+
+請不要替我生成任何新內容。</pre>
+  </div>
+
+  <div class="prompt-block">
+    <div class="pttl">PROMPT B — 給 ChatGPT 免費版（當審查教授）</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">複製</button>
+    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">下面這段是我自己寫的備審段落。請扮演一個「審查教授」，用這三條標準幫我打分：
+1) 這段話「換成另一個學生」是否也寫得出來？（換得出 = 扣分）
+2) 這段話有沒有「具體的時間、地點、人物、感官細節」？（沒有 = 扣分）
+3) 這段話跟我的科系志願有沒有「邏輯上的連結」？（沒有 = 扣分）
+
+請只給扣分項目，不要替我重寫。
+
+我的段落如下：
+[貼上自己的段落]</pre>
+  </div>
+
+  <div class="prompt-block">
+    <div class="pttl">PROMPT C — 給 Perplexity（查目標科系功課）</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">複製</button>
+    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">我要報考 [XX 科技大學] [XX 系] 的個人申請，請幫我整理：
+1) 該系課程的三個特色或必修核心課
+2) 兩位最近三年有公開研究或教學成果的老師（附引用來源）
+3) 該系畢業生最常去的三種就業領域
+
+請務必附上來源連結，我要自己進去確認。</pre>
+  </div>
+
+  <div class="prompt-block">
+    <div class="pttl">PROMPT D — 任何 AI（文法檢查，別寫過頭）</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">複製</button>
+    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">我貼下面這段是我自己寫的備審段落。請你只做：
+1) 找出錯字、贅字、標點符號錯誤
+2) 找出「太抽象、應該補具體例子」的句子（標出來但不要替我補）
+3) 不要改我的語氣、不要替我加修辭、不要把句子重寫得更工整
+
+我的段落如下：
+[貼上自己的段落]</pre>
+  </div>
+
+  <hr class="sep" />
+
+  <!-- ====== 額外加映：AI 美術 = 完全 OK 區 ====== -->
+  <div class="card good" style="border-left-color: var(--green); background: #E8F5EC;">
+    <div class="ttl" style="color: var(--green); font-size: 16px;">🎨 額外加映：AI 做「美術」是 OK 的</div>
+    <p style="margin: 6px 0 0; font-size: 14px; color: var(--ink);">
+      前面三紅線講的是「<strong>文字內容</strong>」——故事與細節 AI 不能代寫。
+      但「<strong>視覺呈現</strong>」（封面、排版、配色、圖表、icon）AI 全用沒問題，反而能幫你補上「商科技高生缺設計訓練」的弱點。
+    </p>
+  </div>
+
+  <h3 style="color: var(--navy); margin-top: 18px;">這 6 件「美術活」可以放心交給 AI</h3>
+  <div class="three-lines">
+    <div class="line-row green">
+      <div class="lbl">✓ 封面</div>
+      <div class="desc">給 ChatGPT / Claude 描述風格 → 生 SVG / 排版指令；或用 <strong>Canva 免費版</strong> 的「AI 生封面」。</div>
+    </div>
+    <div class="line-row green">
+      <div class="lbl">✓ 章節頁</div>
+      <div class="desc">每章開頭一頁簡潔的標題＋一張 AI 生的小插圖。<strong>Bing Image Creator</strong>（免費 DALL-E 3）夠用。</div>
+    </div>
+    <div class="line-row green">
+      <div class="lbl">✓ 配色字型</div>
+      <div class="desc">問 AI：「我要嚴肅又溫暖的商科備審配色＋字型搭配」。可省下三天找色票時間。</div>
+    </div>
+    <div class="line-row green">
+      <div class="lbl">✓ 圖表化</div>
+      <div class="desc">把證照清單、活動時間軸、學習歷程，請 AI 畫成 mermaid / 表格 / 時間軸。</div>
+    </div>
+    <div class="line-row green">
+      <div class="lbl">✓ 排版</div>
+      <div class="desc"><strong>Adobe Express 免費版</strong> 或 <strong>Gamma</strong> 都能把你的純文字一鍵變成像樣的版型。</div>
+    </div>
+    <div class="line-row green">
+      <div class="lbl">✓ 個人 logo</div>
+      <div class="desc">免費的 <strong>Ideogram</strong>（會生出有文字的 logo）或 <strong>Looka</strong>。商科系所喜歡有品牌識別感的備審。</div>
+    </div>
+  </div>
+
+  <h3 style="color: var(--navy); margin-top: 18px;">3 個給商科技高生的視覺 prompt 範本</h3>
+
+  <div class="prompt-block">
+    <div class="pttl">PROMPT V1 — 給 ChatGPT / Claude：產生 SVG 封面</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">複製</button>
+    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">請幫我生一個備審資料的封面 SVG，要求：
+- 尺寸 A4 直式（210x297mm，viewBox 對應）
+- 風格：簡約、商務、有溫度（不要太冷漠）
+- 配色：深靛 + 米白 + 一個金色點綴
+- 內容：上方放我的姓名「[你的姓名]」，中間放科系志願「[XX 科技大學 XX 系 個人申請 備審資料]」，下方放年份「2026」
+- 留白要夠，不要塞滿
+請直接輸出 SVG 程式碼，我會貼到 Inkscape / Illustrator / Figma 微調。</pre>
+  </div>
+
+  <div class="prompt-block">
+    <div class="pttl">PROMPT V2 — 給 Bing Image Creator（免費 DALL-E 3）</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">複製</button>
+    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">A minimalist vertical illustration for a college application portfolio chapter divider, theme: "[你的章節主題，例如：我的商科探索之路]", style: editorial, deep navy and warm cream colors with subtle gold accent, flat illustration, no text, professional but humane, 2:3 aspect ratio</pre>
+  </div>
+
+  <div class="prompt-block">
+    <div class="pttl">PROMPT V3 — 給 Gamma / Canva：把純文字一鍵變排版</div>
+    <button class="copy-btn" onclick="copyPrompt(this)">複製</button>
+    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">我要把這段「學習歷程描述」做成可讀性高的單頁排版（直式 A4）。
+請以「商務簡約風」呈現：左欄放時間軸（年份+里程碑），右欄放敘述文字。
+請使用我提供的內容做排版，不要替我新增或修改文字內容。
+
+[貼上你的學習歷程文字]</pre>
+  </div>
+
+  <div class="card warn" style="margin-top: 16px;">
+    <div class="ttl">⚠️ 一個邊界要清楚</div>
+    AI 可以幫你「<strong>排版你做過的事</strong>」，但不要用 AI 生成「<strong>假裝做過的作品</strong>」當作品集——
+    例如生一張 AI 圖貼上去說「這是我設計的 logo」。教授一查就破，扣分極重。
+  </div>
+
+  <hr class="sep" />
+
+  <label for="prompt_tried">你現場試了哪個 prompt（文字或視覺）？AI 回了什麼讓你印象最深？</label>
+  <textarea id="prompt_tried" placeholder="不一定要寫長，重點是「我發現 ___」。"></textarea>
+
+  <div class="nav">
+    <button class="ghost" onclick="prevStep()">← 上一步</button>
+    <button class="primary" onclick="nextStep()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ============ STEP 5: 科別細化（動態） ============ -->
+<section class="step" data-step="5">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 5</span>
+    <h2>你的科別專屬卡</h2>
+  </div>
+  <p class="lead">下面內容會根據你 Step 0 選的科別自動帶出。</p>
+
+  <div id="dpcardWrap"></div>
+
+  <div class="nav">
+    <button class="ghost" onclick="prevStep()">← 上一步</button>
+    <button class="primary" onclick="nextStep()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ============ STEP 6: 真實性宣言 ============ -->
+<section class="step" data-step="6">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 6</span>
+    <h2>寫下你的「真實性宣言」</h2>
+  </div>
+  <p class="lead">最後一步。把今天寫的這些東西，凝聚成一句你自己的話。</p>
+
+  <div class="card">
+    <div class="ttl">指引</div>
+    參考下面這個句型，把空白處填上「<strong>只有你</strong>」能寫的具體事情。寫完，貼在你備審第一頁。
+  </div>
+
+  <div class="declaration">
+    我寫的這段，AI 寫不出來，因為——
+    <textarea id="declaration" placeholder="例：我國一就開始幫媽媽核對信用卡帳單，因為她是視障輕度。第一次發現一筆 369 元盜刷時我超緊張，從那次起我學會看商家英文縮寫。"></textarea>
+  </div>
+
+  <div class="card good">
+    <div class="ttl">✓ 一個秘密</div>
+    當你願意寫下這句話，你的備審就已經贏了 80% ——因為大多數人沒意識到自己有什麼是 AI 抄不到的。
+  </div>
+
+  <div class="nav">
+    <button class="ghost" onclick="prevStep()">← 上一步</button>
+    <button class="primary" onclick="nextStep()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ============ STEP 7: 送出 + 摘要 ============ -->
+<section class="step" data-step="7">
+  <div class="step-title-row">
+    <span class="step-tag">STEP 7</span>
+    <h2>檢查並送出</h2>
+  </div>
+  <p class="lead">這是你今天的紀錄。送出後老師可以看到摘要（不會公開給其他同學），也會請你截圖留存。</p>
+
+  <div class="summary-card" id="summaryCard">
+    <h3>📋 我的練習單摘要</h3>
+    <div id="summaryBody"></div>
+  </div>
+
+  <div class="card warn">
+    <div class="ttl">⚠️ 送出前請確認</div>
+    1) 個人資料是真的。<br />
+    2) 真實性宣言是你想寫的。<br />
+    3) 老師會看摘要——確定都填好了？
+  </div>
+
+  <div style="background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 16px; margin: 16px 0;">
+    <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-weight: 600; color: var(--navy); margin: 0;">
+      <input type="checkbox" id="share_public" checked style="width: auto; margin: 5px 0 0; flex-shrink: 0;" />
+      <span>
+        我同意把回答<strong>匿名顯示</strong>在「即時牆」上，讓全班一起看。<br />
+        <span style="font-weight: 400; color: var(--muted); font-size: 12px;">（只會顯示科別，姓名與班級絕不公開。取消勾選的話老師仍會收到，但不會出現在即時牆。）</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="nav">
+    <button class="ghost" onclick="prevStep()">← 上一步</button>
+    <button class="alert" onclick="submitForm()">✓ 確定送出</button>
+  </div>
+</section>
+
+<!-- ============ DONE ============ -->
+<section class="step" data-step="8">
+  <div class="done-wrap">
+    <h1>🎉 已送出！</h1>
+    <p>你的練習單已經傳給老師。請<strong>截圖</strong>下面這張卡片，貼到你備審第一頁——這就是你今天的成果。</p>
+
+    <div class="declaration" id="finalDeclaration" style="text-align: left; max-width: 600px; margin: 24px auto;">
+      <strong style="color: var(--gold); display: block; margin-bottom: 12px;">▍我的真實性宣言</strong>
+      <span id="finalDecText" style="font-size: 18px; line-height: 1.8;"></span>
+      <div style="margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.6);">
+        — <span id="finalNameText"></span>，<span id="finalDateText"></span>
+      </div>
+    </div>
+
+    <div class="download-buttons">
+      <button class="ghost" onclick="downloadJSON()">下載我的填寫紀錄 (JSON)</button>
+      <button class="ghost" onclick="resetAll()">重新填寫</button>
+    </div>
+
+    <p class="small" style="margin-top: 30px;">
+      工作坊輔助教材下載：
+      <a href="EdYouth_延伸閱讀簡報_給商科高三.pptx" download>延伸閱讀簡報</a> /
+      <a href="學習單_主+5科別細化_紙本備援版.docx" download>紙本備援版學習單</a>
+    </p>
+  </div>
+</section>
+
+</div>
+
+<div class="toast" id="toast">已複製到剪貼簿</div>
+
+<script>
+// ============================
+// 設定區
+// ============================
+// ⚙️ 把這裡改成您部署的 Apps Script Web App URL（部署完成後）
+// 若留空，送出後會用 mailto: 寄出資料給 SUBMIT_EMAIL（備援機制）
+const APPS_SCRIPT_URL = ""; // 例如 "https://script.google.com/macros/s/AKfycb.../exec"
+const SUBMIT_EMAIL = "info@3zhiyu.net"; // 沒有 Apps Script 時的備援收信箱
+const STORAGE_KEY = "南商工作坊_2026_v2";
+
+// ============================
+// 5 科別細化內容
+// ============================
+const DP_DATA = {
+  "商業經營科": {
+    theme: "你的真實性藏在「你看過店面怎麼運作」裡。",
+    assets: [
+      "我曾經在自家／親戚／打工的店裡幫忙——做過什麼具體的事？",
+      "我曾經算過一家店一週、一個月的客流量／業績／毛利嗎？",
+      "我有沒有觀察過某個產品為什麼賣得好（或賣不好）？",
+      "我曾經為某個活動／社團／班級做過行銷或宣傳？",
+      "我曾經跟客人吵架／處理客訴／處理退換貨？",
+      "我有沒有自己上過 IG／TikTok／蝦皮賣過任何東西？",
+    ],
+    examples: [
+      "媽媽開早餐店，你算過 30 天客流＝行銷直覺",
+      "幫班級做畢旅宣傳海報＋IG 貼文＝行銷實作",
+      "在家族雜貨店看叔叔跟廠商殺價＝採購直覺",
+    ],
+    transform: {
+      before: "我對商業很有興趣，希望進企管系學行銷與管理。",
+      after: "我從國二開始每週六在媽媽的早餐店幫忙，發現週六客人比平日多 30%，但毛利反而低——因為他們點低毛利的奶茶。這讓我第一次意識到「來客數」與「客單利潤」是兩件事。",
+    },
+  },
+  "國際貿易科": {
+    theme: "你的真實性藏在「你曾經跨過的那個語言或文化邊界」裡。",
+    assets: [
+      "家裡有人從事進出口、海外採購、外銷？我聽過什麼具體的事？",
+      "我有沒有自己上 Shopee 全球／Amazon／淘寶買過東西？",
+      "我曾經跟外籍移工、觀光客、外國朋友交談過？",
+      "我有沒有看過 / 學過 第三種語言？",
+      "我有沒有看懂過進口商品的英文標籤？",
+      "我曾經算過匯率、看過匯率變動嗎？",
+    ],
+    examples: [
+      "我家做家具五金外銷越南——客戶來訪那次的故事",
+      "去韓國自由行幫家人翻譯菜單＝跨語溝通",
+      "高二寒假在 Shopee 全球賣過二手書到馬來西亞",
+    ],
+    transform: {
+      before: "我對國際貿易有興趣，希望從事跨國商務。",
+      after: "我家做家具五金小型外銷，爸媽客戶八成在越南。國二有次客戶來訪，我發現他講越南話夾雜法文單字，回去查才知道殖民歷史。從那次起我開始留意「同一個東西在不同國家的講法」。",
+    },
+  },
+  "會計事務科": {
+    theme: "你的真實性藏在「你曾經親手處理過的那筆帳」裡。",
+    assets: [
+      "我曾經幫家裡／班級／社團記過帳？",
+      "我曾經幫家人核對發票、信用卡帳單、收據？",
+      "我有沒有自己用記帳 APP 記錄過 1 個月以上的開銷？",
+      "我曾經發現過家人或店家的帳目錯誤？",
+      "我有沒有去過稅務局／看過家人報稅？",
+      "我考過會計丙級——考過後實際幫家裡做過任何事嗎？",
+    ],
+    examples: [
+      "幫媽媽核對信用卡帳單發現一筆 369 元盜刷",
+      "管理班級畢旅費 6 萬元，做了完整收支表",
+      "用 CWMoney 記了 18 個月的個人開銷，發現自己外食花最多",
+    ],
+    transform: {
+      before: "我從小對數字敏感、細心、有條理，希望成為會計師。",
+      after: "我國一就開始幫媽媽核對信用卡帳單，因為她是視障輕度。第一次發現一筆 369 元盜刷時我超緊張，從那次起我學會看商家英文縮寫。爸媽信任我這件事，是我選會計的真正理由。",
+    },
+  },
+  "資料處理科": {
+    theme: "全場只有你一位資處——這是優勢。你的真實性藏在「你做過的小專案」裡。",
+    assets: [
+      "我曾經自學過 Python / JS / SQL？學到哪？卡在哪？",
+      "我曾經幫家人／同學修過電腦／設定過 Wi-Fi？",
+      "我曾經做過 Excel 進階功能（VLOOKUP、樞紐、巨集）？",
+      "我做過任何小程式、小遊戲、小自動化（IFTTT、Zapier、Apps Script）？",
+      "我有 GitHub / Codepen / 某個作品連結？沒有的話 1 週內可以開——",
+      "我用過 ChatGPT 寫程式？最有趣的一次是什麼？",
+    ],
+    examples: [
+      "用 Google Sheet 分析爸便當店訂單，發現週三業績低 25%",
+      "高二寒假寫 Python 爬蟲幫媽媽追蹤蝦皮競品價格",
+      "幫社團做了一個 Google Form＋Apps Script 自動回信系統",
+    ],
+    transform: {
+      before: "我從小喜歡電腦，會寫程式，希望進資工系深入學習人工智慧。",
+      after: "高一寒假爸爸便當店生意變差，我用 Google Sheet 把過去 3 個月每日訂單匯入，發現週三業績總是低 25%——後來才知道是隔壁有人擺攤搶客。這是我第一次發現「資料能看見肉眼看不見的事」。",
+    },
+  },
+  "應用英語科": {
+    theme: "你的真實性藏在「你用英語做過的事」裡，不是「你考過幾級」。",
+    assets: [
+      "我有沒有用英語跟陌生人對話過？什麼場合？",
+      "我看過完整一本英文小說 / 一整季英文影集（不開字幕）？",
+      "我有沒有翻譯過某段東西？（IG 文、迷因、歌詞）",
+      "我有寫過英文社群貼文／部落格／自介？",
+      "我考的英檢分數背後我「實際用英語做過什麼」？",
+      "我有沒有追英語 YouTuber 超過 1 個月？為什麼追？",
+    ],
+    examples: [
+      "看完 Seinfeld 9 季不開字幕，發現美國 90 年代脫口秀比現在慢",
+      "高二在 Reddit 上回答外國人關於台灣的問題回過 50 篇",
+      "幫媽媽翻譯國外保健品說明書 30 份",
+    ],
+    transform: {
+      before: "I love English very much, and I want to become an English teacher.",
+      after: "我國二開始每天看一集 Seinfeld 不開字幕。前 30 集幾乎全部聽不懂，從第 50 集開始我能聽懂梗。我發現美國 90 年代脫口秀比現在慢——這個觀察讓我想去應英系把「英語的歷史變化」學成正式知識。",
+    },
+  },
+};
+
+// ============================
+// 狀態管理
+// ============================
+const TOTAL_STEPS = 7; // 0..7（送出按鈕在 step 7，完成在 step 8）
+let currentStep = 0;
+
+const FIELDS = [
+  "f_name", "f_class", "f_dept", "f_target",
+  "q1", "q2", "q3", "q4", "q5", "q6",
+  "reflect_examples",
+  "line_green", "line_yellow", "line_red",
+  "prompt_tried",
+  "declaration",
+];
+
+function getData() {
+  const d = {};
+  FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) d[id] = el.value;
+  });
+  // 動態欄位：科別資產勾選
+  d.assets_checked = [];
+  document.querySelectorAll('.asset-list input[type="checkbox"]:checked').forEach(cb => {
+    d.assets_checked.push(cb.value);
+  });
+  d.dp_reflect = (document.getElementById('dp_reflect') || {}).value || "";
+  d.dp_my_story = (document.getElementById('dp_my_story') || {}).value || "";
+  // 公開分享 checkbox
+  const sp = document.getElementById('share_public');
+  d.share_public = sp ? sp.checked : true; // 預設打勾
+  d.savedAt = new Date().toISOString();
+  return d;
+}
+
+function setData(d) {
+  if (!d) return;
+  FIELDS.forEach(id => {
+    if (d[id] !== undefined) {
+      const el = document.getElementById(id);
+      if (el) el.value = d[id];
+    }
+  });
+}
+
+function autosave() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(getData()));
+    flashSaved();
+  } catch (e) {}
+}
+
+function flashSaved() {
+  const s = document.getElementById('saveStatus');
+  s.textContent = "✓ 已儲存";
+  s.style.color = "var(--green)";
+  clearTimeout(window._savetm);
+  window._savetm = setTimeout(() => {
+    s.textContent = "● 自動儲存中";
+    s.style.color = "var(--muted)";
+  }, 1200);
+}
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      setData(JSON.parse(raw));
+    }
+  } catch (e) {}
+}
+
+// ============================
+// 步驟切換
+// ============================
+function showStep(n) {
+  document.querySelectorAll('section.step').forEach(s => s.classList.remove('active'));
+  const target = document.querySelector(`section.step[data-step="${n}"]`);
+  if (target) target.classList.add('active');
+  currentStep = n;
+  // 更新進度條
+  document.getElementById('stepCount').textContent = `第 ${Math.min(n+1, TOTAL_STEPS+1)} / ${TOTAL_STEPS+1} 步`;
+  const pct = Math.min((n / TOTAL_STEPS) * 100, 100);
+  document.getElementById('pbarFill').style.width = pct + '%';
+  // 滾到頂端
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Step 5 動態渲染
+  if (n === 5) renderDPCard();
+  // Step 7 渲染摘要
+  if (n === 7) renderSummary();
+}
+
+function nextStep() {
+  if (currentStep === 0 && !document.getElementById('f_dept').value) {
+    alert("請選擇你的科別。");
+    return;
+  }
+  showStep(currentStep + 1);
+}
+
+function prevStep() {
+  showStep(currentStep - 1);
+}
+
+// ============================
+// 科別卡渲染
+// ============================
+function renderDPCard() {
+  const dept = document.getElementById('f_dept').value || "商業經營科";
+  const data = DP_DATA[dept];
+  if (!data) return;
+  const wrap = document.getElementById('dpcardWrap');
+  wrap.innerHTML = `
+    <div class="dpcard">
+      <div class="card warn">
+        <div class="ttl">${dept}｜你的科專屬</div>
+        ${data.theme}
+      </div>
+
+      <h3>① 你科的「真實素材清單」（勾選你有的）</h3>
+      <p style="font-size: 13px; color: var(--muted); margin: 4px 0 8px;">先別急著寫漂亮，先把你「實際做過但沒寫進備審」的事勾出來。</p>
+      <ul class="asset-list">
+        ${data.assets.map((a, i) => `
+          <li>
+            <label>
+              <input type="checkbox" value="${a.replace(/"/g, '&quot;')}" data-idx="${i}" onchange="autosave()" />
+              <span>${a}</span>
+            </label>
+          </li>
+        `).join('')}
+      </ul>
+
+      <h3>② 三個案例：別人寫過的好故事</h3>
+      <p style="font-size: 13px; color: var(--muted); margin: 4px 0 8px;">這些都是真實學長姐寫過的故事——不是要你抄，是讓你知道「具體可以多具體」。</p>
+      <ul style="padding-left: 20px;">
+        ${data.examples.map(e => `<li style="margin: 6px 0; font-size: 14px;">${e}</li>`).join('')}
+      </ul>
+
+      <h3>③ 改寫對照：從乾巴巴 → 真實有戲</h3>
+      <div class="compare">
+        <div class="col bad">
+          <div class="ttl">乾巴巴版（AI 平均值）</div>
+          ${data.transform.before}
+        </div>
+        <div class="col good">
+          <div class="ttl">真實有戲版</div>
+          ${data.transform.after}
+        </div>
+      </div>
+
+      <h3>④ 寫下你科特有的真實故事</h3>
+      <label for="dp_my_story">用上面對照的「真實有戲」格式，寫一段你自己的</label>
+      <textarea id="dp_my_story" rows="6" placeholder="不一定要 200 字，重點是要有時間／地點／人物／數字／感受。"></textarea>
+
+      <label for="dp_reflect">寫完後，問自己：這段話「換成另一個 ${dept} 同學」，他寫得出來嗎？</label>
+     

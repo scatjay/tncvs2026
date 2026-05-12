@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>即時牆｜南商工作坊</title>
+<style>
+  :root {
+    --navy: #1B2541;
+    --navy-soft: #2A3556;
+    --red: #D62828;
+    --gold: #B8902A;
+    --gold-bright: #E9B44C;
+    --green: #0A7C2F;
+    --ink: #2A2A2A;
+    --muted: #6B6B6B;
+    --card: #F4F1EC;
+    --rule: #D9D2C5;
+    --bg: #FCFAF7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.7;
+  }
+  header {
+    background: var(--navy); color: #fff;
+    padding: 24px 20px;
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  header .inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    flex-wrap: wrap;
+  }
+  header h1 { margin: 0; font-size: 22px; }
+  header .label { font-size: 11px; letter-spacing: 4px; color: var(--gold-bright); font-weight: 700; }
+  .live-indicator {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #B8B8C8;
+  }
+  .live-dot {
+    width: 10px; height: 10px;
+    background: #00FF88; border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .nav-back {
+    color: var(--gold-bright); text-decoration: none; font-size: 14px;
+    font-weight: 600;
+  }
+  .nav-back:hover { text-decoration: underline; }
+
+  /* STATS BAR */
+  .stats {
+    background: #fff;
+    border-bottom: 1px solid var(--rule);
+    padding: 16px 20px;
+  }
+  .stats-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr auto; gap: 20px;
+    align-items: center; flex-wrap: wrap;
+  }
+  @media (max-width: 700px) { .stats-inner { grid-template-columns: 1fr; } }
+  .stat-row {
+    display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .stat {
+    display: flex; align-items: baseline; gap: 8px;
+  }
+  .stat .num {
+    font-size: 28px; font-weight: 800; color: var(--red);
+    font-family: "Consolas", monospace;
+  }
+  .stat .lbl { font-size: 13px; color: var(--muted); }
+
+  /* FILTER */
+  .filters {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: var(--card); border: 1px solid var(--rule);
+    color: var(--ink); padding: 6px 12px;
+    border-radius: 99px; font-size: 12px;
+    cursor: pointer; font-family: inherit;
+    transition: all .15s;
+  }
+  .filter-btn.active {
+    background: var(--navy); color: #fff; border-color: var(--navy);
+  }
+  .filter-btn:hover { background: var(--rule); }
+  .filter-btn.active:hover { background: var(--navy-soft); }
+
+  /* MAIN */
+  .container {
+    max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px;
+  }
+  .empty-state {
+    text-align: center; padding: 80px 20px;
+    color: var(--muted);
+  }
+  .empty-state h2 { color: var(--navy); }
+
+  /* QUESTION SECTION */
+  .qsection {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .qheader {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+  }
+  .qheader .qnum {
+    background: var(--gold-bright);
+    color: var(--navy);
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-weight: 800; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .qheader .qtitle {
+    flex: 1; font-weight: 700; font-size: 15px;
+  }
+  .qheader .qcount {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .qheader .toggle {
+    color: var(--gold-bright); font-size: 18px;
+    transition: transform .2s;
+  }
+  .qsection.collapsed .qheader .toggle { transform: rotate(-90deg); }
+  .qsection.collapsed .qbody { display: none; }
+
+  .qbody {
+    padding: 12px 20px 20px;
+  }
+  .answer {
+    background: var(--card);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .answer.declaration {
+    background: var(--navy);
+    color: #fff;
+    border-left-color: var(--gold-bright);
+    font-weight: 600;
+  }
+  .answer-meta {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex; gap: 12px; align-items: center;
+  }
+  .answer.declaration .answer-meta { color: rgba(255,255,255,0.6); }
+  .dept-tag {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 8px; border-radius: 99px;
+    font-weight: 600;
+  }
+  .answer.declaration .dept-tag { background: rgba(255,255,255,0.15); color: var(--gold-bright); }
+
+  /* DEPT DIST */
+  .dept-bars {
+    display: flex; gap: 4px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .dept-bar {
+    background: var(--card);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: 1px solid var(--rule);
+  }
+  .dept-bar strong { color: var(--red); }
+
+  /* TEACHER NOTE */
+  .teacher-note {
+    background: linear-gradient(135deg, var(--gold-bright) 0%, var(--gold) 100%);
+    color: var(--navy);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .teacher-note .icn { font-size: 22px; }
+
+  /* ERROR */
+  .error-box {
+    background: #FFEDED; border: 1px solid var(--red);
+    padding: 16px; border-radius: 8px;
+    color: var(--red); font-size: 14px;
+    margin: 20px 0;
+  }
+  .error-box code {
+    background: rgba(0,0,0,0.05); padding: 2px 6px;
+    border-radius: 4px; font-family: "Consolas", monospace; font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <div>
+      <div class="label">2026/05/22 國立臺南高商</div>
+      <h1>📊 即時回應牆</h1>
+    </div>
+    <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span id="liveStatus">即時更新中（30 秒）</span>
+      </div>
+      <a href="index.html" class="nav-back">← 返回入口</a>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat-row" id="statRow">
+      <div class="stat"><span class="num">0</span><span class="lbl">總送出</span></div>
+    </div>
+    <div class="filters" id="filterBar">
+      <button class="filter-btn active" data-dept="all" onclick="setFilter('all')">全部</button>
+      <button class="filter-btn" data-dept="商業經營科" onclick="setFilter('商業經營科')">商經</button>
+      <button class="filter-btn" data-dept="國際貿易科" onclick="setFilter('國際貿易科')">國貿</button>
+      <button class="filter-btn" data-dept="會計事務科" onclick="setFilter('會計事務科')">會計</button>
+      <button class="filter-btn" data-dept="資料處理科" onclick="setFilter('資料處理科')">資處</button>
+      <button class="filter-btn" data-dept="應用英語科" onclick="setFilter('應用英語科')">應英</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<div id="content">
+  <div class="empty-state">
+    <h2>等待第一份回答…</h2>
+    <p>當有同學送出練習單後，這裡會即時顯示。</p>
+    <p style="font-size: 12px; margin-top: 30px;">如果你已經送出但這裡沒顯示——可能是後台尚未設定。請參考 <code>部署指南.md</code>。</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ⚙️ 部署完 Apps Script 後，把這裡改成實際 Web App URL
+const APPS_SCRIPT_URL = ""; // 例如 "https://script.google.com/macros/s/AKfycb.../exec"
+
+const REFRESH_MS = 30000;
+
+const QUESTIONS = [
+  { key: "q1", title: "Q1. 我家裡發生過最特別的一件事？" },
+  { key: "q2", title: "Q2. 我做過最丟臉／最挫敗的一件事？" },
+  { key: "q3", title: "Q3. 我曾經為某件事熬夜——那是什麼？" },
+  { key: "q4", title: "Q4. 我有什麼別人不太知道的小怪癖？" },
+  { key: "q5", title: "Q5. 我曾經在哪一個科目「突然開竅」？" },
+  { key: "q6", title: "Q6. 我現在最想學會的一個技能是什麼？" },
+  { key: "dp_my_story", title: "📌 你科特有的真實故事（科別深化練習）" },
+  { key: "declaration", title: "🏆 我的真實性宣言", isDeclaration: true },
+];
+
+let allData = [];
+let currentFilter = "all";
+
+function setFilter(d) {
+  currentFilter = d;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.dept === d);
+  });
+  render();
+}
+
+async function fetchData() {
+  if (!APPS_SCRIPT_URL) {
+    showError("尚未設定後台。請打開 <code>wall.html</code>，把 <code>APPS_SCRIPT_URL</code> 改成您部署的 Apps Script Web App 網址。");
+    return;
+  }
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + "?action=list");
+    const json = await res.json();
+    if (Array.isArray(json.data)) {
+      allData = json.data;
+      render();
+      updateStats();
+    } else if (json.error) {
+      showError("後台回傳錯誤：" + json.error);
+    }
+  } catch (e) {
+    console.warn(e);
+    showError("無法連線到後台。<br />可能原因：(1) Apps Script URL 錯誤 (2) 部署時權限沒設成「任何人」(3) 網路斷線。");
+  }
+}
+
+function showError(msg) {
+  const c = document.getElementById('content');
+  c.innerHTML = `<div class="error-box">⚠️ ${msg}</div>`;
+}
+
+function updateStats() {
+  const filtered = currentFilter === "all" ? allData : allData.filter(d => d.f_dept === currentFilter);
+  const deptCount = {};
+  allData.forEach(d => {
+    const dept = d.f_dept || "未填";
+    deptCount[dept] = (deptCount[dept] || 0) + 1;
+  });
+  const totalDecl = allData.filter(d => d.declaration && d.declaration.trim()).length;
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat"><span class="num">${allData.length}</span><span class="lbl">總送出</span></div>
+    <div class="stat"><span class="num">${totalDecl}</span><span class="lbl">寫了真實性宣言</span></div>
+    <div class="stat" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+      <span class="lbl" style="font-size: 11px;">科別分佈</span>
+      <div class="dept-bars">
+        ${Object.entries(deptCount).map(([k, v]) => `<span class="dept-bar">${k.replace(/科$/, '')} <strong>${v}</strong></span>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const filtered = currentFilter === "all" ? allData : allData.filter(d => d.f_dept === currentFilter);
+  if (filtered.length === 0) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty-state">
+        <h2>${currentFilter === "all" ? "等待第一份回答…" : `${currentFilter} 還沒有人送出`}</h2>
+      </div>
+    `;
+    return;
+  }
+
+  let html = `
+    <div class="teacher-note">
+      <span class="icn">💡</span>
+      <span>看完這些回答，你會發現「<strong>具體的真實性</strong>」比想像得更打動人。回去看自己的真實性宣言，可以再具體一點嗎？</span>
+    </div>
+  `;
+
+  // 真實性宣言放最上面（最有衝擊力）
+  const declQ = QUESTIONS.find(q => q.isDeclaration);
+  const declAnswers = filtered.filter(d => d[declQ.key] && d[declQ.key].trim()).reverse();
+  if (declAnswers.length) {
+    html += renderQuestion(declQ, declAnswers);
+  }
+
+  // 科別深化故事
+  const dpQ = QUESTIONS.find(q => q.key === "dp_my_story");
+  const dpAnswers = filtered.filter(d => d[dpQ.key] && d[dpQ.key].trim()).reverse();
+  if (dpAnswers.length) {
+    html += renderQuestion(dpQ, dpAnswers);
+  }
+
+  // Q1-Q6 — 預設折疊（避免太雜）
+  QUESTIONS.filter(q => q.key.startsWith('q')).forEach((q, i) => {
+    const answers = filtered.filter(d => d[q.key] && d[q.key].trim()).reverse();
+    if (answers.length) {
+      html += renderQuestion(q, answers, i > 1); // 前 2 題展開、其他折疊
+    }
+  });
+
+  document.getElementById('content').innerHTML = html;
+
+  // 折疊切換
+  document.querySelectorAll('.qheader').forEach(h => {
+    h.addEventListener('click', () => {
+      h.parentElement.classList.toggle('collapsed');
+    });
+  });
+}
+
+function renderQuestion(q, answers, collapsed = false) {
+  const isDecl = q.isDeclaration;
+  return `
+    <div class="qsection${collapsed ? ' collapsed' : ''}">
+      <div class="qheader">
+        <span class="qnum">${q.title.split('.')[0].split(' ')[0] || '★'}</span>
+        <span class="qtitle">${q.title}</span>
+        <span class="qcount">${answers.length}</span>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="qbody">
+        ${answers.slice(0, 50).map(d => `
+          <div class="answer${isDecl ? ' declaration' : ''}">
+            ${isDecl ? '「我寫的這段，AI 寫不出來，因為——' : ''}${esc(d[q.key])}${isDecl ? '」' : ''}
+            <div class="answer-meta">
+              <span class="dept-tag">${esc(d.f_dept || '未填')}</span>
+              <span>${formatTime(d.savedAt)}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/[<>&"]/g, m => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]));
+}
+
+function formatTime(iso) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return ""; }
+}
+
+// 初始化 + 定時更新
+fetchData();
+setInterval(fetchData, REFRESH_MS);
+</script>
+
+</body>
+</html>
